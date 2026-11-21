@@ -1,0 +1,14 @@
+# BatteryGuard AI - dependencias (Python 3.11 o superior; probado con 3.14.0)
+# Motor de IA (modelo del equipo)
+pandas>=2.2
+numpy>=1.26
+scikit-learn==1.9.1     # misma version con la que se serializaron los .joblib
+joblib>=1.4
+shap>=0.46
+matplotlib>=3.8
+# Lectura de archivos Excel en la pantalla Datos
+openpyxl>=3.1
+xlrd>=2.0
+# Asistente conversacional BatteryGuard AI
+groq>=0.30
+# Pruebas del modelo

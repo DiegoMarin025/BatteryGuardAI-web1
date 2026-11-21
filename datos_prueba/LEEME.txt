@@ -1,0 +1,46 @@
+BatteryGuard AI - Datos de prueba
+=================================
+
+Cómo usarlos: abre la app, ve a «Datos», arrastra el archivo y pulsa
+«Puntuar con el modelo y ver prioridades». Para volver a la flota completa
+usa «Volver al dataset de referencia».
+
+
+1) flota_prueba_400.xlsx  (Excel, hoja «Baterias»)
+---------------------------------------------------
+400 baterías REALES del conjunto de prueba del equipo: el modelo nunca las
+vio al entrenar, así que sirve para comprobar si de verdad funciona.
+80 de ellas fallaron en la realidad (20 %); la columna battery_failure trae
+ese resultado real. La hoja «Leeme» solo es informativa; la app usa sola la
+hoja «Baterias».
+
+Qué debes ver con el umbral recomendado (19 %):
+  - 86 baterías en riesgo alto
+  - El modelo detecta 72 de las 80 fallas reales (90 %)
+  - 14 falsas alarmas
+Mueve el umbral para ver cómo cambian estas cifras y la curva de captura.
+
+
+2) escenarios_prueba.csv  (CSV)
+-------------------------------
+10 baterías creadas a partir de una batería típica de la flota, cambiando
+solo las variables de cada caso. No trae battery_failure (prueba que la app
+funciona sin el resultado real). La columna «escenario» describe cada caso.
+
+Resultado del modelo (umbral 19 %):
+  ESC-01  Sana y nueva                0.0 %   Bajo    10,456 ciclos
+  ESC-02  Típica de la flota          0.1 %   Bajo     7,942 ciclos
+  ESC-03  Sobrecalentamiento         47.2 %   Alto     7,773 ciclos
+  ESC-04  Resistencia interna alta    0.2 %   Bajo     7,790 ciclos
+  ESC-05  Muchas alertas del BMS     31.6 %   Alto     7,966 ciclos
+  ESC-06  Historial de fallas         9.6 %   Medio    7,942 ciclos
+  ESC-07  Desgaste avanzado           5.9 %   Bajo     3,693 ciclos
+  ESC-08  Carga rápida intensiva      0.8 %   Bajo     7,683 ciclos
+  ESC-09  Enfriamiento dañado         9.5 %   Medio    7,919 ciclos
+  ESC-10  Combinación crítica        99.5 %   Alto     4,499 ciclos
+
+Lectura: el modelo reacciona sobre todo al calor, a las alertas del BMS y a la
+combinación de varios problemas. Una sola señal aislada (por ejemplo, solo
+resistencia alta) casi no sube el riesgo; el desgaste baja mucho la vida útil
+aunque el riesgo de falla inmediato siga bajo. Abre cada batería en la
+pantalla «Batería» para ver su explicación SHAP y usar el simulador.

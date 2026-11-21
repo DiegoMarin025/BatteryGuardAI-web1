@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BatteryGuard AI</title>
+<script>try{var t=localStorage.getItem("bg-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="loading" id="loading"><div><div class="spinner"></div><h2>Conectando con el modelo de IA</h2><p id="loadMsg">Cargando la flota puntuada por el modelo…</p></div></div>
+
+<header class="topbar">
+  <a class="brand" href="#fleet" data-go="fleet">
+    <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2.5 4 5.8v6c0 5 3.4 8.8 8 10 4.6-1.2 8-5 8-10v-6z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="m13 6.5-4 6.2h3.3l-1.4 4.8 4.2-6.6h-3.4z" fill="currentColor"/></svg></span>
+    <span>BatteryGuard AI<small>Mantenimiento predictivo</small></span>
+  </a>
+  <nav class="nav" aria-label="Secciones">
+    <button data-go="fleet" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg><span>Flota</span></button>
+    <button data-go="detail"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="7" width="17" height="10" rx="2.5"/><path d="M21.5 10.5v3M6.5 10v4M10 10v4M13.5 10v4"/></svg><span>Batería</span></button>
+    <button data-go="data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="5.5" rx="7.5" ry="2.8"/><path d="M4.5 5.5v6.5c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8V5.5M4.5 12v6.5c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8V12"/></svg><span>Datos</span></button>
+  </nav>
+  <div class="tools">
+    <div class="status" id="status" title="Estado del modelo de IA"><i></i><span>Conectando…</span></div>
+    <button class="icon-btn" id="themeBtn" aria-label="Cambiar tema"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" id="themeIco"></svg></button>
+  </div>
+</header>
+
+<main>
+<!-- Flota -->
+<section class="screen active" id="screen-fleet" aria-labelledby="fleet-h">
+  <div class="head">
+    <div><h1 id="fleet-h">Centro de control de baterías</h1><p class="lead" id="finding">—</p></div>
+    <div class="btns">
+      <button class="btn" data-go="data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4m0 0L7 9m5-5 5 5M20 16.5v2a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5v-2"/></svg>Cargar CSV</button>
+      <button class="btn primary" id="exportBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v12m0 0 5-5m-5 5-5-5M4 20h16"/></svg>Exportar lista de inspección</button>
+    </div>
+  </div>
+  <details class="why"><summary><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/></svg>¿Cómo leer este tablero?</summary>
+    <div>El <b>modelo de IA</b> (Gradient Boosting entrenado con el historial de 20,000 baterías) calcula para cada batería su <b>probabilidad de falla</b> y su <b>vida útil restante en ciclos</b>. Todo lo que ves aquí sale de esas dos predicciones: los indicadores, la batería central, las gráficas y la lista. Con el <b>umbral de riesgo</b> decides a partir de qué probabilidad una batería se manda a inspección; al moverlo, todo el tablero se recalcula.</div>
+  </details>
+
+  <div class="grid">
+    <div class="c3"><article class="card kpi alert" id="k1"></article></div>
+    <div class="c3"><article class="card kpi" id="k2"></article></div>
+    <div class="c3"><article class="card kpi" id="k3"></article></div>
+    <div class="c3"><article class="card kpi" id="k4"></article></div>
+
+    <section class="c8 card hero" aria-labelledby="hero-h">
+      <div class="hero-head">
+        <div><h2 id="hero-h">Batería prioritaria</h2><p id="heroLead">—</p></div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <div class="seg" id="spotSeg" role="group" aria-label="Elegir prioridad"></div>
+          <button class="btn sm" id="spotOpen">Abrir diagnóstico →</button>
+        </div>
+      </div>
+      <div class="hero-grid" id="fleetHero"></div>
+      <details class="why" style="margin:12px 0 0"><summary><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/></svg>¿Qué muestra la batería?</summary>
+        <div>Es la batería que el modelo considera con <b>mayor probabilidad de falla</b> (#1) y las 4 que le siguen. Cada tarjeta muestra una medición y la línea apunta a la parte del pack que describe: los <b>módulos encendidos</b> representan la salud, la <b>línea lateral</b> la temperatura, los <b>terminales</b> la resistencia interna y el <b>LED</b> las alertas del sistema de gestión (BMS). El color compara contra el resto de la flota: <b class="t-low">verde</b> normal, <b class="t-med">ámbar</b> elevado y <b class="t-high">rojo</b> entre los peores.</div>
+      </details>
+    </section>
+
+    <div class="c4 side side-thr">
+      <section class="card panel" aria-labelledby="thr-h">
+        <div class="thr"><label for="threshold" id="thr-h">Umbral de riesgo alto</label><output id="thrOut" for="threshold">—</output></div>
+        <input type="range" id="threshold" min="5" max="60" step="1" value="19">
+        <div class="scale"><span>5 % · más inspecciones</span><button class="btn sm" id="thrReset" style="height:24px">Usar recomendado</button><span>60 % · menos</span></div>
+        <dl class="stats">
+          <div class="stat"><dt>A inspeccionar</dt><dd id="sInspect">—</dd></div>
+          <div class="stat"><dt>Fallas capturadas</dt><dd class="t-acc" id="sCapture">—</dd></div>
+          <div class="stat"><dt>Falsas alarmas</dt><dd id="sFalse">—</dd></div>
+          <div class="stat"><dt>Fallas que escapan</dt><dd id="sMissed">—</dd></div>
+        </dl>
+        <div class="help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/></svg>
+          <span><b>¿Para qué sirve?</b> El modelo da a cada batería una probabilidad de falla. El umbral es el corte a partir del cual una batería se marca como <b>riesgo alto</b> y entra a la lista de inspección. <b>Bájalo</b> si el taller puede revisar más baterías (detectas más fallas, con más falsas alarmas). <b>Súbelo</b> si hay poca capacidad. El valor recomendado por el modelo es <b id="thrRec">19 %</b>.</span></div>
+        <p class="note" id="costNote">—</p>
+      </section>
+    </div>
+
+      <section class="c4 card panel chart" aria-labelledby="dist-h">
+        <div class="ph"><div><h2 id="dist-h">Distribución de riesgo</h2><p>Baterías por nivel según el umbral.</p></div></div>
+        <div class="donut-wrap" id="donut"></div>
+        <details class="why" style="margin:12px 0 0"><summary><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/></svg>¿Cómo se definen los niveles?</summary>
+          <div><b>Alto:</b> probabilidad igual o mayor al umbral; inspeccionar pronto. <b>Medio:</b> entre <span id="medTxt">7 %</span> y el umbral; vigilar en el siguiente servicio. <b>Bajo:</b> menos de <span id="medTxt2">7 %</span>; mantenimiento normal.</div></details>
+      </section>
+    <section class="c4 card panel chart" aria-labelledby="cap-h">
+      <div class="ph"><div><h2 id="cap-h">Curva de captura de fallas</h2><p>Qué parte de las fallas reales se detecta según cuánta flota inspeccionas.</p></div></div>
+      <details class="why"><summary><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/></svg>¿Cómo se lee?</summary>
+        <div>Si revisas las baterías en el orden que propone el modelo, el eje horizontal es <b>qué porcentaje de la flota inspeccionas</b> y el vertical <b>qué porcentaje de las fallas reales del historial encuentras</b>. La línea punteada es revisar al azar. El punto blanco es tu umbral actual. Mientras más rápido sube la curva, mejor prioriza el modelo. Nota: con el dataset de referencia la curva incluye las baterías con las que se entrenó el modelo, por eso la captura sale más alta que el recall medido en las 5,000 baterías de prueba (86.7 %).</div></details>
+      <div id="curve"></div>
+    </section>
+    <section class="c4 card panel chart" aria-labelledby="brand-h">
+      <div class="ph"><div><h2 id="brand-h">Riesgo por marca</h2><p>Porcentaje de baterías en riesgo alto y medio.</p></div>
+        <div class="legend" style="margin:0"><span><i style="background:var(--high)"></i>Alto</span><span><i style="background:var(--med)"></i>Medio</span></div></div>
+      <details class="why"><summary><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/></svg>¿Para qué sirve?</summary>
+        <div>Muestra las 10 marcas con más proporción de baterías en riesgo. Ayuda a planear refacciones o a hablar con el fabricante. No significa que la marca sea mala: el riesgo también depende del uso, el clima y la antigüedad de esas baterías.</div></details>
+      <div id="brands"></div>
+    </section>
+
+    <section class="c7 card panel chart" aria-labelledby="sc-h">
+      <div class="ph"><div><h2 id="sc-h">Salud vs. temperatura</h2><p>Cada punto es una batería, coloreada por el riesgo del modelo. Toca un punto para abrirla.</p></div></div>
+      <details class="why"><summary><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/></svg>¿Qué me dice?</summary>
+        <div>Cruza dos de las señales que más pesan en el modelo: la <b>salud</b> (capacidad disponible) y la <b>temperatura máxima de celda</b>. Las baterías en rojo se agrupan donde hay calor alto; así puedes ver de un vistazo qué combinación de condiciones vuelve riesgosa a una batería.</div></details>
+      <div class="scatter"><canvas id="scatter" role="img" aria-label="Dispersión de salud contra temperatura máxima"></canvas></div>
+      <div class="legend"><span><i style="background:var(--high)"></i>Alto</span><span><i style="background:var(--med)"></i>Medio</span><span><i style="background:var(--cell)"></i>Bajo</span></div>
+    </section>
+    <section class="c5 card panel" aria-labelledby="rank-h">
+      <div class="ph"><div><h2 id="rank-h">Top 15 por probabilidad de falla</h2><p>Las primeras baterías a inspeccionar, con los filtros aplicados.</p></div></div>
+      <div class="rank" id="rank"></div>
+    </section>
+
+    <section class="c12 card panel" aria-labelledby="list-h">
+      <div class="ph"><div><h2 id="list-h">Lista priorizada de inspección</h2><p id="listSub">—</p></div></div>
+      <details class="why"><summary><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/></svg>¿Cómo la uso?</summary>
+        <div>Todas las baterías ordenadas por la probabilidad de falla del modelo. Filtra por marca, modelo o tipo de flota, ordena con los encabezados y haz clic en una fila para ver su diagnóstico. <b>Exportar lista de inspección</b> descarga en CSV la lista filtrada para la orden de trabajo.</div></details>
+      <div class="toolbar">
+        <label class="field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="search" type="search" placeholder="Buscar batería o vehículo" aria-label="Buscar batería o vehículo"></label>
+        <label class="field"><select id="fBrand" aria-label="Marca"></select></label>
+        <label class="field"><select id="fModel" aria-label="Modelo"></select></label>
+        <label class="field"><select id="fFleet" aria-label="Tipo de flota"><option value="">Toda la flota</option><option value="Fleet">Flotilla</option><option value="Private">Privado</option></select></label>
+        <button class="btn" id="clearBtn">Limpiar filtros</button>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr>
+          <th><button class="sort" data-sort="id">Batería</button></th><th class="hide-sm">Vehículo</th><th class="hide-sm">Marca y modelo</th><th class="hide-sm">Flota</th>
+          <th class="r"><button class="sort" data-sort="p">Riesgo de falla</button></th><th>Nivel</th>
+          <th class="r hide-sm"><button class="sort" data-sort="health">Salud</button></th><th class="r hide-sm"><button class="sort" data-sort="life">Vida útil (ciclos)</button></th><th class="r hide-sm"><span class="sr">Abrir</span></th>
+        </tr></thead><tbody id="rows"></tbody></table></div>
+      <div class="tfoot"><span id="rowInfo">—</span><nav class="pager" id="pager" aria-label="Páginas de la lista"></nav></div>
+    </section>
+  </div>
+  <div class="footer"><span id="footModel">—</span><span>Equipo BatteryGuard AI · LITIID71</span></div>
+</section>
+
+<!-- Detalle -->
+<section class="screen" id="screen-detail" aria-labelledby="detail-h">
+  <div class="head">
+    <div><button class="back" data-go="fleet">← Volver a la flota</button><h1 id="detail-h">—</h1><p class="lead" id="dMeta">—</p></div>
+    <div class="btns">
+      <button class="btn" id="nextBtn">Siguiente en prioridad →</button>
+      <button class="btn primary" id="sheetBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v12m0 0 5-5m-5 5-5-5M4 20h16"/></svg>Exportar ficha</button>
+    </div>
+  </div>
+  <div class="grid">
+    <section class="c12 card hero" aria-labelledby="dhero-h">
+      <div class="hero-head"><div><h2 id="dhero-h">Diagnóstico del pack</h2><p id="dLead">—</p></div><span id="dPill"></span></div>
+      <div class="hero-grid" id="detailHero"></div>
+    </section>
+    <section class="c7 card panel" aria-labelledby="why-h">
+      <div class="ph"><div><h2 id="why-h">Por qué tiene este riesgo</h2><p id="whySub">Las 5 variables que más influyen en la predicción (SHAP).</p></div></div>
+      <details class="why"><summary><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/></svg>¿Qué es SHAP?</summary>
+        <div>Es la técnica con la que el modelo <b>explica su decisión</b> para esta batería en particular. Cada barra indica cuánto empuja una variable la probabilidad de falla: hacia <b class="t-high">arriba (rojo)</b> o hacia <b class="t-low">abajo (verde)</b>. Las barras más largas son las que más pesan; son las primeras cosas a revisar en el taller.</div></details>
+      <div id="factors"></div>
+      <div class="axis-note"><span>← Reduce el riesgo</span><span>Aumenta el riesgo →</span></div>
+    </section>
+    <section class="c5 card panel chart" aria-labelledby="radar-h">
+      <div class="ph"><div><h2 id="radar-h">Perfil frente a la flota</h2><p>Percentil de cada señal de desgaste.</p></div></div>
+      <details class="why"><summary><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/></svg>¿Cómo se lee?</summary>
+        <div>Cada eje compara esta batería con las demás. El <b>anillo punteado</b> es la mediana de la flota (percentil 50). Un punto cerca del borde significa que la batería está <b>peor que casi todas</b> en esa señal. "Desgaste" es lo contrario de la salud: más alto, menos capacidad.</div></details>
+      <div id="radar"></div>
+    </section>
+    <section class="c7 card panel" aria-labelledby="sim-h">
+      <div class="ph"><div><h2 id="sim-h">Simular y recalcular el riesgo</h2><p>El modelo real recalcula con cada ajuste.</p></div><button class="btn sm" id="simReset">Restablecer</button></div>
+      <details class="why"><summary><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/></svg>¿Para qué sirve?</summary>
+        <div>Responde preguntas de tipo <b>"¿qué pasaría si…?"</b>. Por ejemplo: si se repara el enfriamiento y baja la temperatura, ¿cuánto baja el riesgo? Los cambios se aplican sobre el registro completo de la batería y se envían al modelo (<span class="mono">predecir()</span>). No modifican los datos guardados.</div></details>
+      <div class="sim" id="sim"></div>
+      <div class="sim-out" aria-live="polite">
+        <div class="stat"><dt>Riesgo recalculado</dt><dd id="simRisk">—</dd></div>
+        <div class="stat"><dt>Cambio frente al registro</dt><dd id="simDelta">—</dd></div>
+        <div class="stat"><dt>Vida útil recalculada</dt><dd id="simLife">—</dd></div>
+        <div class="stat"><dt>Respuesta del modelo</dt><dd id="simTime">—</dd></div>
+      </div>
+      <div id="simMsgs" class="msgs-box"></div>
+    </section>
+    <section class="c5 card panel chat-panel" aria-labelledby="chat-h">
+      <div class="ph"><div><h2 id="chat-h">Pregunta a BatteryGuard AI</h2><p id="chatSub">Asistente de IA con los datos de esta batería.</p></div><span class="ai-badge" id="aiBadge">—</span></div>
+      <div class="messages" id="messages" aria-live="polite"></div>
+      <div class="chips"><button class="chip">¿Por qué revisarla primero?</button><button class="chip">¿Qué debo inspeccionar?</button><button class="chip">¿Cuánta vida le queda?</button></div>
+      <form class="compose" id="chatForm"><input id="chatInput" placeholder="Escribe tu pregunta…" aria-label="Pregunta sobre esta batería"><button class="send" aria-label="Enviar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button></form>
+    </section>
+    <section class="c5 card panel" aria-labelledby="todo-h">
+      <div class="ph"><div><h2 id="todo-h">Qué inspeccionar</h2><p>Acciones sugeridas según los factores que suben el riesgo.</p></div></div>
+      <ul class="checklist" id="checklist"></ul>
+      <p class="note">La IA orienta la revisión; el diagnóstico final corresponde al técnico.</p>
+    </section>
+    <section class="c7 card panel" aria-labelledby="sig-h">
+      <div class="ph"><div><h2 id="sig-h">Mediciones registradas</h2><p>Valor de la batería frente a la flota. Percentil = % de baterías con un valor igual o menor.</p></div></div>
+      <div class="table-wrap"><table><thead><tr><th>Variable</th><th class="r">Valor</th><th class="r hide-sm">Mediana flota</th><th class="r">Percentil</th></tr></thead><tbody id="signals"></tbody></table></div>
+    </section>
+  </div>
+</section>
+
+<!-- Datos -->
+<section class="screen" id="screen-data" aria-labelledby="data-h">
+  <div class="head">
+    <div><h1 id="data-h">Carga y calidad de datos</h1><p class="lead">Sube un historial de baterías en CSV o Excel. El modelo de IA lo puntúa en tu computadora y el tablero completo pasa a mostrar ese archivo.</p></div>
+    <div class="btns"><button class="btn" id="resetData">Volver al dataset de referencia</button></div>
+  </div>
+  <ol class="steps" id="steps"><li class="done"><b>1</b>Cargar archivo</li><li><b>2</b>Revisar calidad</li><li><b>3</b>Puntuar con el modelo</li></ol>
+  <div class="grid">
+    <section class="c6 card panel" aria-labelledby="up-h">
+      <div class="ph"><div><h2 id="up-h">Historial de baterías</h2><p>Archivo CSV o Excel (.xlsx, .xls) con los encabezados del dataset en la primera fila.</p></div></div>
+      <label class="drop" id="drop" for="csvInput"><span><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4m0 0L7 9m5-5 5 5M20 16.5v2a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5v-2"/></svg></span><strong id="dropTitle">Arrastra tu archivo CSV o Excel aquí</strong><span id="dropSub">o haz clic para elegirlo</span></span></label>
+      <input type="file" id="csvInput" accept=".csv,.txt,.xlsx,.xlsm,.xls,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" class="sr">
+      <div class="help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/></svg>
+        <span><b>¿Qué columnas necesita?</b> Las mismas del dataset (por ejemplo <span class="mono">battery_health_percent</span>, <span class="mono">cell_temperature_max</span>, <span class="mono">internal_resistance</span>). Las que falten se completan con la mediana del historial; mientras más columnas traiga, más precisa es la predicción. Si incluye <span class="mono">battery_failure</span>, el tablero también mide cuántas fallas reales captura. En Excel se usa la hoja que tenga más columnas del modelo; en CSV se acepta coma, punto y coma o tabulador como separador.</span></div>
+    </section>
+    <section class="c6 card panel" aria-labelledby="q-h">
+      <div class="ph"><div><h2 id="q-h">Calidad del archivo</h2><p id="qFile">—</p></div></div>
+      <dl class="stats" style="margin-top:0">
+        <div class="stat"><dt>Registros</dt><dd id="qRows">—</dd></div>
+        <div class="stat"><dt>Columnas</dt><dd id="qCols">—</dd></div>
+        <div class="stat"><dt>Celdas vacías</dt><dd id="qMissing">—</dd></div>
+        <div class="stat"><dt>Variables del modelo</dt><dd id="qFeats">—</dd></div>
+      </dl>
+      <div id="qAlert"></div>
+      <button class="btn primary" id="scoreBtn" style="margin-top:14px" disabled>Puntuar con el modelo y ver prioridades →</button>
+    </section>
+    <section class="c12 card panel" aria-labelledby="pv-h">
+      <div class="ph"><div><h2 id="pv-h">Vista previa</h2><p>Primeros registros del archivo.</p></div></div>
+      <div class="table-wrap"><table><thead id="pvHead"></thead><tbody id="pvRows"></tbody></table></div>
+    </section>
+  </div>
+</section>
+
+</main>
+<div class="tip" id="tip"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="pack.js"></script>
+<script src="charts.js"></script>
+<script src="anim.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
